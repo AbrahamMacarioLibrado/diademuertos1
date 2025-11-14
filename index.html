@@ -18,6 +18,7 @@
             color: white;
             text-align: center;
             padding: 40px 20px;
+            position: relative;
         }
 
         h1, h2 {
@@ -94,16 +95,132 @@
 
         /* Estilos para los enlaces */
         a {
-            color: #d8433d; /* Un color de enlace que combine con el diseño */
+            color: #d8433d;
             text-decoration: none;
             transition: color 0.3s;
         }
 
         a:hover {
-            color: #ff9800; /* Color al pasar el ratón */
+            color: #ff9800;
             text-decoration: underline;
         }
 
+        /* Estilos para el sistema de autenticación */
+        .auth-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .auth-buttons button {
+            background-color: #fff;
+            color: #e85a4f;
+            border: none;
+            padding: 8px 15px;
+            margin-left: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .auth-buttons button:hover {
+            background-color: #f5f5f5;
+        }
+
+        .auth-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .auth-form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .auth-form h2 {
+            margin-top: 0;
+            color: #e85a4f;
+            text-align: center;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .auth-form button {
+            width: 100%;
+            padding: 12px;
+            background-color: #e85a4f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .auth-form button:hover {
+            background-color: #d8433d;
+        }
+
+        .auth-form p {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .auth-form a {
+            color: #e85a4f;
+            cursor: pointer;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #777;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            display: none;
+        }
+
+        .user-info button {
+            background-color: transparent;
+            color: white;
+            border: 1px solid white;
+            padding: 5px 10px;
+            margin-left: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .user-info button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
 
         @media (max-width: 768px) {
             main {
@@ -122,21 +239,72 @@
             .lugares-grid {
                 grid-template-columns: 1fr;
             }
+
+            .auth-buttons {
+                position: static;
+                margin-top: 15px;
+            }
+
+            .user-info {
+                position: static;
+                margin-top: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1> Día de Muertos </h1>
+        <h1>Día de Muertos</h1>
         <nav>
             <a href="#dia-de-muertos" style="color:white; margin: 0 15px;">La Tradición</a> |
             <a href="#lugares-turisticos" style="color:white; margin: 0 15px;">Lugares Turísticos</a> |
             <a href="#catrina" style="color:white; margin: 0 15px;">La Catrina</a>
         </nav>
+        
+        <!-- Botones de autenticación -->
+        <div class="auth-buttons" id="authButtons">
+            <button id="loginBtn">Iniciar Sesión</button>
+            <button id="registerBtn">Registrarse</button>
+        </div>
+        
+        <!-- Información del usuario logueado -->
+        <div class="user-info" id="userInfo">
+            <span id="userWelcome">Bienvenido, Usuario</span>
+            <button id="logoutBtn">Cerrar Sesión</button>
+        </div>
     </header>
 
-    <main>
+    <!-- Modal de Inicio de Sesión -->
+    <div class="auth-modal" id="loginModal">
+        <div class="auth-form">
+            <span class="close-btn" id="closeLogin">&times;</span>
+            <h2>Iniciar Sesión</h2>
+            <form id="loginForm">
+                <input type="email" id="loginEmail" placeholder="Correo electrónico" required>
+                <input type="password" id="loginPassword" placeholder="Contraseña" required>
+                <button type="submit">Iniciar Sesión</button>
+            </form>
+            <p>¿No tienes cuenta? <a id="goToRegister">Regístrate aquí</a></p>
+        </div>
+    </div>
 
+    <!-- Modal de Registro -->
+    <div class="auth-modal" id="registerModal">
+        <div class="auth-form">
+            <span class="close-btn" id="closeRegister">&times;</span>
+            <h2>Registrarse</h2>
+            <form id="registerForm">
+                <input type="text" id="registerName" placeholder="Nombre completo" required>
+                <input type="email" id="registerEmail" placeholder="Correo electrónico" required>
+                <input type="password" id="registerPassword" placeholder="Contraseña" required>
+                <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" required>
+                <button type="submit">Registrarse</button>
+            </form>
+            <p>¿Ya tienes cuenta? <a id="goToLogin">Inicia sesión aquí</a></p>
+        </div>
+    </div>
+
+    <main>
         <section id="dia-de-muertos">
             <h2>El Día de Muertos</h2>
             
@@ -227,5 +395,162 @@
         <p>&copy; 2025 Tradiciones Mexicanas. Todos los derechos reservados.</p>
         <p>Patrimonio Cultural Inmaterial de la Humanidad por la UNESCO.</p>
     </footer>
+
+    <script>
+        // Elementos del DOM
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const loginModal = document.getElementById('loginModal');
+        const registerModal = document.getElementById('registerModal');
+        const closeLogin = document.getElementById('closeLogin');
+        const closeRegister = document.getElementById('closeRegister');
+        const goToRegister = document.getElementById('goToRegister');
+        const goToLogin = document.getElementById('goToLogin');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const authButtons = document.getElementById('authButtons');
+        const userInfo = document.getElementById('userInfo');
+        const userWelcome = document.getElementById('userWelcome');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Mostrar modal de login
+        loginBtn.addEventListener('click', () => {
+            loginModal.style.display = 'flex';
+        });
+
+        // Mostrar modal de registro
+        registerBtn.addEventListener('click', () => {
+            registerModal.style.display = 'flex';
+        });
+
+        // Cerrar modales
+        closeLogin.addEventListener('click', () => {
+            loginModal.style.display = 'none';
+        });
+
+        closeRegister.addEventListener('click', () => {
+            registerModal.style.display = 'none';
+        });
+
+        // Cambiar entre modales
+        goToRegister.addEventListener('click', () => {
+            loginModal.style.display = 'none';
+            registerModal.style.display = 'flex';
+        });
+
+        goToLogin.addEventListener('click', () => {
+            registerModal.style.display = 'none';
+            loginModal.style.display = 'flex';
+        });
+
+        // Cerrar modal al hacer clic fuera
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.style.display = 'none';
+            }
+            if (e.target === registerModal) {
+                registerModal.style.display = 'none';
+            }
+        });
+
+        // Manejo del formulario de login
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Aquí iría la lógica para autenticar con el servidor
+            // Por ahora simulamos un login exitoso
+            if (email && password) {
+                // Guardar usuario en localStorage
+                localStorage.setItem('user', JSON.stringify({
+                    name: email.split('@')[0],
+                    email: email
+                }));
+                
+                // Actualizar interfaz
+                updateUI();
+                
+                // Cerrar modal
+                loginModal.style.display = 'none';
+                
+                // Limpiar formulario
+                loginForm.reset();
+                
+                alert('¡Inicio de sesión exitoso!');
+            } else {
+                alert('Por favor, completa todos los campos.');
+            }
+        });
+
+        // Manejo del formulario de registro
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validaciones básicas
+            if (password !== confirmPassword) {
+                alert('Las contraseñas no coinciden.');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('La contraseña debe tener al menos 6 caracteres.');
+                return;
+            }
+            
+            // Aquí iría la lógica para registrar en el servidor
+            // Por ahora simulamos un registro exitoso
+            if (name && email && password) {
+                // Guardar usuario en localStorage
+                localStorage.setItem('user', JSON.stringify({
+                    name: name,
+                    email: email
+                }));
+                
+                // Actualizar interfaz
+                updateUI();
+                
+                // Cerrar modal
+                registerModal.style.display = 'none';
+                
+                // Limpiar formulario
+                registerForm.reset();
+                
+                alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
+            } else {
+                alert('Por favor, completa todos los campos.');
+            }
+        });
+
+        // Cerrar sesión
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('user');
+            updateUI();
+            alert('Has cerrado sesión.');
+        });
+
+        // Actualizar la interfaz según el estado de autenticación
+        function updateUI() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            
+            if (user) {
+                // Usuario logueado
+                authButtons.style.display = 'none';
+                userInfo.style.display = 'block';
+                userWelcome.textContent = `Bienvenido, ${user.name}`;
+            } else {
+                // Usuario no logueado
+                authButtons.style.display = 'block';
+                userInfo.style.display = 'none';
+            }
+        }
+
+        // Inicializar la interfaz al cargar la página
+        document.addEventListener('DOMContentLoaded', updateUI);
+    </script>
 </body>
 </html>
