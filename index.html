@@ -56,6 +56,50 @@
             text-decoration: underline;
         }
         
+        .auth-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        
+        .auth-buttons button {
+            background-color: #fff;
+            color: #e85a4f;
+            border: none;
+            padding: 8px 15px;
+            margin-left: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .auth-buttons button:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            display: none;
+        }
+        
+        .user-info button {
+            background-color: transparent;
+            color: white;
+            border: 1px solid white;
+            padding: 5px 10px;
+            margin-left: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .user-info button:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
         main {
             max-width: 1200px;
             margin: 0 auto;
@@ -261,6 +305,86 @@
             display: none;
         }
         
+        /* Modales de autenticación */
+        .auth-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .auth-form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .auth-form h2 {
+            margin-top: 0;
+            color: #e85a4f;
+            text-align: center;
+        }
+        
+        .auth-form input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .auth-form button {
+            width: 100%;
+            padding: 12px;
+            background-color: #e85a4f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .auth-form button:hover {
+            background-color: #d8433d;
+        }
+        
+        .auth-form p {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .auth-form a {
+            color: #e85a4f;
+            cursor: pointer;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #777;
+        }
+        
+        .error-message {
+            color: #d8433d;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
         @media (max-width: 768px) {
             main {
                 padding: 20px;
@@ -287,6 +411,11 @@
             h1 {
                 font-size: 2.2rem;
             }
+            
+            .auth-buttons, .user-info {
+                position: static;
+                margin-top: 15px;
+            }
         }
     </style>
 </head>
@@ -299,7 +428,51 @@
             <a href="#catrina">La Catrina</a>
             <a href="#formulario">Deja tu Comentario</a>
         </nav>
+        
+        <!-- Botones de autenticación -->
+        <div class="auth-buttons" id="authButtons">
+            <button id="loginBtn">Iniciar Sesión</button>
+            <button id="registerBtn">Registrarse</button>
+        </div>
+        
+        <!-- Información del usuario logueado -->
+        <div class="user-info" id="userInfo">
+            <span id="userWelcome">Bienvenido, Usuario</span>
+            <button id="logoutBtn">Cerrar Sesión</button>
+        </div>
     </header>
+
+    <!-- Modal de Inicio de Sesión -->
+    <div class="auth-modal" id="loginModal">
+        <div class="auth-form">
+            <span class="close-btn" id="closeLogin">&times;</span>
+            <h2>Iniciar Sesión</h2>
+            <form id="loginForm">
+                <input type="email" id="loginEmail" placeholder="Correo electrónico" required>
+                <input type="password" id="loginPassword" placeholder="Contraseña" required>
+                <div id="loginError" class="error-message">Correo o contraseña incorrectos</div>
+                <button type="submit">Iniciar Sesión</button>
+            </form>
+            <p>¿No tienes cuenta? <a id="goToRegister">Regístrate aquí</a></p>
+        </div>
+    </div>
+
+    <!-- Modal de Registro -->
+    <div class="auth-modal" id="registerModal">
+        <div class="auth-form">
+            <span class="close-btn" id="closeRegister">&times;</span>
+            <h2>Registrarse</h2>
+            <form id="registerForm">
+                <input type="text" id="registerName" placeholder="Nombre completo" required>
+                <input type="email" id="registerEmail" placeholder="Correo electrónico" required>
+                <input type="password" id="registerPassword" placeholder="Contraseña" required>
+                <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" required>
+                <div id="registerError" class="error-message">Las contraseñas no coinciden</div>
+                <button type="submit">Registrarse</button>
+            </form>
+            <p>¿Ya tienes cuenta? <a id="goToLogin">Inicia sesión aquí</a></p>
+        </div>
+    </div>
 
     <main>
         <section id="dia-de-muertos">
@@ -457,6 +630,232 @@
     </footer>
 
     <script>
+        // Sistema de Usuarios - Base de datos simulada con localStorage
+        class UserDatabase {
+            constructor() {
+                this.usersKey = 'diaDeMuertosUsers';
+                this.commentsKey = 'diaDeMuertosComments';
+                this.currentUserKey = 'currentUser';
+            }
+            
+            // Obtener todos los usuarios
+            getUsers() {
+                return JSON.parse(localStorage.getItem(this.usersKey)) || [];
+            }
+            
+            // Guardar usuarios
+            saveUsers(users) {
+                localStorage.setItem(this.usersKey, JSON.stringify(users));
+            }
+            
+            // Registrar nuevo usuario
+            registerUser(name, email, password) {
+                const users = this.getUsers();
+                
+                // Verificar si el usuario ya existe
+                if (users.find(user => user.email === email)) {
+                    return { success: false, message: 'El usuario ya existe' };
+                }
+                
+                // Crear nuevo usuario
+                const newUser = {
+                    id: Date.now(),
+                    name: name,
+                    email: email,
+                    password: password, // En un caso real, esto debería estar encriptado
+                    registrationDate: new Date().toISOString()
+                };
+                
+                users.push(newUser);
+                this.saveUsers(users);
+                
+                return { success: true, message: 'Usuario registrado exitosamente' };
+            }
+            
+            // Iniciar sesión
+            loginUser(email, password) {
+                const users = this.getUsers();
+                const user = users.find(u => u.email === email && u.password === password);
+                
+                if (user) {
+                    // Guardar usuario actual
+                    localStorage.setItem(this.currentUserKey, JSON.stringify(user));
+                    return { success: true, user: user };
+                } else {
+                    return { success: false, message: 'Credenciales incorrectas' };
+                }
+            }
+            
+            // Cerrar sesión
+            logoutUser() {
+                localStorage.removeItem(this.currentUserKey);
+            }
+            
+            // Obtener usuario actual
+            getCurrentUser() {
+                return JSON.parse(localStorage.getItem(this.currentUserKey));
+            }
+            
+            // Guardar comentario
+            saveComment(comment) {
+                const comments = this.getComments();
+                comments.push(comment);
+                localStorage.setItem(this.commentsKey, JSON.stringify(comments));
+            }
+            
+            // Obtener comentarios
+            getComments() {
+                return JSON.parse(localStorage.getItem(this.commentsKey)) || [];
+            }
+        }
+
+        // Inicializar la base de datos
+        const userDB = new UserDatabase();
+
+        // Elementos del DOM
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const loginModal = document.getElementById('loginModal');
+        const registerModal = document.getElementById('registerModal');
+        const closeLogin = document.getElementById('closeLogin');
+        const closeRegister = document.getElementById('closeRegister');
+        const goToRegister = document.getElementById('goToRegister');
+        const goToLogin = document.getElementById('goToLogin');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const authButtons = document.getElementById('authButtons');
+        const userInfo = document.getElementById('userInfo');
+        const userWelcome = document.getElementById('userWelcome');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginError = document.getElementById('loginError');
+        const registerError = document.getElementById('registerError');
+
+        // Mostrar modal de login
+        loginBtn.addEventListener('click', () => {
+            loginModal.style.display = 'flex';
+        });
+
+        // Mostrar modal de registro
+        registerBtn.addEventListener('click', () => {
+            registerModal.style.display = 'flex';
+        });
+
+        // Cerrar modales
+        closeLogin.addEventListener('click', () => {
+            loginModal.style.display = 'none';
+            loginError.style.display = 'none';
+        });
+
+        closeRegister.addEventListener('click', () => {
+            registerModal.style.display = 'none';
+            registerError.style.display = 'none';
+        });
+
+        // Cambiar entre modales
+        goToRegister.addEventListener('click', () => {
+            loginModal.style.display = 'none';
+            registerModal.style.display = 'flex';
+            loginError.style.display = 'none';
+        });
+
+        goToLogin.addEventListener('click', () => {
+            registerModal.style.display = 'none';
+            loginModal.style.display = 'flex';
+            registerError.style.display = 'none';
+        });
+
+        // Cerrar modal al hacer clic fuera
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.style.display = 'none';
+                loginError.style.display = 'none';
+            }
+            if (e.target === registerModal) {
+                registerModal.style.display = 'none';
+                registerError.style.display = 'none';
+            }
+        });
+
+        // Manejo del formulario de login
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const result = userDB.loginUser(email, password);
+            
+            if (result.success) {
+                updateUI();
+                loginModal.style.display = 'none';
+                loginForm.reset();
+                loginError.style.display = 'none';
+                alert(`¡Bienvenido de nuevo, ${result.user.name}!`);
+            } else {
+                loginError.style.display = 'block';
+            }
+        });
+
+        // Manejo del formulario de registro
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validar que las contraseñas coincidan
+            if (password !== confirmPassword) {
+                registerError.style.display = 'block';
+                return;
+            }
+            
+            // Validar longitud de contraseña
+            if (password.length < 6) {
+                alert('La contraseña debe tener al menos 6 caracteres.');
+                return;
+            }
+            
+            const result = userDB.registerUser(name, email, password);
+            
+            if (result.success) {
+                // Iniciar sesión automáticamente después del registro
+                const loginResult = userDB.loginUser(email, password);
+                if (loginResult.success) {
+                    updateUI();
+                    registerModal.style.display = 'none';
+                    registerForm.reset();
+                    registerError.style.display = 'none';
+                    alert(`¡Bienvenido ${name}! Tu cuenta ha sido creada exitosamente.`);
+                }
+            } else {
+                alert(result.message);
+            }
+        });
+
+        // Cerrar sesión
+        logoutBtn.addEventListener('click', () => {
+            userDB.logoutUser();
+            updateUI();
+            alert('Has cerrado sesión.');
+        });
+
+        // Actualizar la interfaz según el estado de autenticación
+        function updateUI() {
+            const user = userDB.getCurrentUser();
+            
+            if (user) {
+                // Usuario logueado
+                authButtons.style.display = 'none';
+                userInfo.style.display = 'block';
+                userWelcome.textContent = `Bienvenido, ${user.name}`;
+            } else {
+                // Usuario no logueado
+                authButtons.style.display = 'block';
+                userInfo.style.display = 'none';
+            }
+        }
+
+        // Sistema de comentarios
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('satisfaction-form');
             const successMessage = document.getElementById('success-message');
@@ -493,8 +892,8 @@
                     fecha: new Date().toLocaleDateString('es-MX')
                 };
                 
-                // Guardar comentario en localStorage (simulando base de datos)
-                guardarComentario(nuevoComentario);
+                // Guardar comentario en la base de datos
+                userDB.saveComment(nuevoComentario);
                 
                 // Mostrar mensaje de éxito
                 successMessage.style.display = 'block';
@@ -511,16 +910,9 @@
                 }, 5000);
             });
             
-            // Función para guardar comentario en localStorage
-            function guardarComentario(comentario) {
-                let comentarios = JSON.parse(localStorage.getItem('comentariosDiaDeMuertos')) || [];
-                comentarios.push(comentario);
-                localStorage.setItem('comentariosDiaDeMuertos', JSON.stringify(comentarios));
-            }
-            
-            // Función para cargar comentarios desde localStorage
+            // Función para cargar comentarios desde la base de datos
             function cargarComentarios() {
-                const comentarios = JSON.parse(localStorage.getItem('comentariosDiaDeMuertos')) || [];
+                const comentarios = userDB.getComments();
                 comentariosLista.innerHTML = '';
                 
                 if (comentarios.length === 0) {
@@ -561,6 +953,9 @@
                 });
             }
         });
+
+        // Inicializar la interfaz al cargar la página
+        document.addEventListener('DOMContentLoaded', updateUI);
     </script>
 </body>
 </html>
